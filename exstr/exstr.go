@@ -23,6 +23,11 @@ func (s Exstr) Contains(substr string) bool {
 	return strings.Contains(string(s), substr)
 }
 
+// ContainsAny checks if Exstr contains any of the characters in chars.
+func (s Exstr) ContainsAny(chars string) bool {
+	return strings.ContainsAny(string(s), chars)
+}
+
 // Match checks if Exstr matches the given regular expression pattern.
 func (s Exstr) Match(pattern string) bool {
 	re := regexp.MustCompile(pattern)
