@@ -1,19 +1,19 @@
 # Exstr package
 
-The `exstr` package provides an extended string type (`ExStr`) that wraps Go's built-in `string` with convenient methods for common string operations such as pattern matching, replacement, splitting, and trimming.
+The `exstr` package provides an extended string type (`Exstr`) that wraps Go's built-in `string` with convenient methods for common string operations such as pattern matching, replacement, splitting, and trimming.
 
 ## Key types and functions
 
-- `ExStr`: Extended string type based on `string`.
-- `New(s string) ExStr`: Creates a new `ExStr` from a regular string.
+- `Exstr`: Extended string type based on `string`.
+- `New(s string) Exstr`: Creates a new `Exstr` from a regular string.
 - `String() string`: Returns the underlying string value.
 - `Contains(substr string) bool`: Checks if the string contains the given substring.
 - `Match(pattern string) bool`: Checks if the string matches the given regular expression pattern.
 - `Find(pattern string) string`: Returns the first substring matching the given regular expression pattern.
 - `FindAll(pattern string) []string`: Returns all substrings matching the given regular expression pattern.
-- `Replace(old, new string) ExStr`: Replaces all occurrences of `old` with `new`.
+- `Replace(old, new string) Exstr`: Replaces all occurrences of `old` with `new`.
 - `Split(sep string) []string`: Splits the string by the given separator.
-- `Trim() ExStr`: Removes all leading and trailing whitespace.
+- `Trim() Exstr`: Removes all leading and trailing whitespace.
 
 ## Usage
 
