@@ -23,7 +23,7 @@ func (s Exstr) String() string {
 
 // Strings returns a slice of regular strings from an ExstrSlice.
 func (s ExstrSlice) Strings() []string {
-	strs := make([]string, 0, len(s))
+	strs := make([]string, len(s))
 	for i, exstr := range s {
 		strs[i] = exstr.String()
 	}
@@ -32,11 +32,19 @@ func (s ExstrSlice) Strings() []string {
 
 // Contains checks if Exstr contains substr.
 func (s Exstr) Contains(substr string) bool {
+	if substr == "" {
+		return false
+	}
+
 	return strings.Contains(string(s), substr)
 }
 
 // Contains checks if any Exstr in the slice contains substr.
 func (s ExstrSlice) Contains(substr string) bool {
+	if substr == "" {
+		return false
+	}
+
 	for _, exstr := range s {
 		if exstr.Contains(substr) {
 			return true
@@ -47,12 +55,23 @@ func (s ExstrSlice) Contains(substr string) bool {
 
 // ContainsAny checks if Exstr contains any of the characters in chars.
 func (s Exstr) ContainsAny(chars string) bool {
+	if chars == "" {
+		return false
+	}
+
 	return strings.ContainsAny(string(s), chars)
 }
 
 // Match checks if Exstr matches the given regular expression pattern.
 func (s Exstr) Match(pattern string) bool {
-	re := regexp.MustCompile(pattern)
+	if pattern == "" {
+		return false
+	}
+
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return false
+	}
 	return re.MatchString(string(s))
 }
 
@@ -68,16 +87,19 @@ func (s ExstrSlice) Match(pattern string) bool {
 
 // Find returns the first substring of Exstr that matches the given regular expression pattern.
 func (s Exstr) Find(pattern string) Exstr {
-	re := regexp.MustCompile(pattern)
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return ""
+	}
 	return Exstr(re.FindString(string(s)))
 }
 
 // Find returns the first substring of any Exstr in the slice that matches the given regular expression pattern.
 func (s ExstrSlice) Find(pattern string) ExstrSlice {
-	results := make([]Exstr, 0)
-	for _, exstr := range s {
+	results := make([]Exstr, len(s))
+	for i, exstr := range s {
 		if match := exstr.Find(pattern); match != "" {
-			results = append(results, match)
+			results[i] = match
 		}
 	}
 	return results
@@ -85,13 +107,16 @@ func (s ExstrSlice) Find(pattern string) ExstrSlice {
 
 // FindAll returns all substrings of Exstr that match the given regular expression pattern.
 func (s Exstr) FindAll(pattern string) ExstrSlice {
-	re := regexp.MustCompile(pattern)
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return ExstrSlice{}
+	}
 
 	matches := re.FindAllString(string(s), -1)
 
-	slice := make(ExstrSlice, 0, len(matches))
-	for _, match := range matches {
-		slice = append(slice, Exstr(match))
+	slice := make(ExstrSlice, len(matches))
+	for i, match := range matches {
+		slice[i] = Exstr(match)
 	}
 	return slice
 }
@@ -112,9 +137,10 @@ func (s ExstrSlice) Replace(old, new string) ExstrSlice {
 
 // Split splits Exstr into a slice of substrings separated by the given separator.
 func (s Exstr) Split(sep string) ExstrSlice {
-	slice := make(ExstrSlice, 0)
-	for _, part := range strings.Split(string(s), sep) {
-		slice = append(slice, Exstr(part))
+	parts := strings.Split(string(s), sep)
+	slice := make(ExstrSlice, len(parts))
+	for i, part := range parts {
+		slice[i] = Exstr(part)
 	}
 	return slice
 }
@@ -126,9 +152,9 @@ func (s Exstr) Trim() Exstr {
 
 // Trim removes all leading and trailing whitespace from each Exstr in the slice.
 func (s ExstrSlice) Trim() ExstrSlice {
-	slice := make(ExstrSlice, 0, len(s))
-	for _, exstr := range s {
-		slice = append(slice, exstr.Trim())
+	slice := make(ExstrSlice, len(s))
+	for i, exstr := range s {
+		slice[i] = exstr.Trim()
 	}
 	return slice
 }
