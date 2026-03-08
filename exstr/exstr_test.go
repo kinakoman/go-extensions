@@ -36,3 +36,11 @@ func TestExStr(t *testing.T) {
 		t.Errorf("Expected Trim to return 'Hello, World!', got '%s'", trimmed.String())
 	}
 }
+
+func TestExStrSlice(t *testing.T) {
+	str := New("Hello,World")
+	found := str.Split(",").Replace("H", "h").Contains("hello")
+	if !found {
+		t.Errorf("Expected ExstrSlice to contain 'hello', got %v", found)
+	}
+}
