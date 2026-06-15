@@ -10,9 +10,17 @@ var (
 	ErrChannelClosed = errors.New("exchan: channel is closed")
 )
 
+type noCopy struct{}
+
+func (*noCopy) Lock()   {}
+func (*noCopy) Unlock() {}
+
 // Exchan is an extended channel wrapper that never panics.
 // It does NOT close the underlying data channel. Close() only closes done.
+// Passing by value is not recommended.
 type Exchan[T any] struct {
+	_ noCopy
+
 	c    chan T
 	done chan struct{}
 	once sync.Once
@@ -42,6 +50,14 @@ func (e *Exchan[T]) Send(ctx context.Context, v T) error {
 		return ErrChannelClosed
 	case <-ctx.Done():
 		return ctx.Err()
+	default:
+	}
+
+	select {
+	case <-e.done:
+		return ErrChannelClosed
+	case <-ctx.Done():
+		return ctx.Err()
 	case e.c <- v:
 		return nil
 	}
@@ -49,6 +65,16 @@ func (e *Exchan[T]) Send(ctx context.Context, v T) error {
 
 // Recv receives a value, blocking until it succeeds, ctx is done, or Exchan is closed.
 func (e *Exchan[T]) Recv(ctx context.Context) (T, error) {
+	select {
+	case <-e.done:
+		var zero T
+		return zero, ErrChannelClosed
+	case <-ctx.Done():
+		var zero T
+		return zero, ctx.Err()
+	default:
+	}
+
 	select {
 	case <-e.done:
 		var zero T
