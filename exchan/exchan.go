@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 )
 
 var (
@@ -89,3 +90,33 @@ func (e *Exchan[T]) Recv(ctx context.Context) (T, error) {
 
 func (e *Exchan[T]) Len() int { return len(e.c) }
 func (e *Exchan[T]) Cap() int { return cap(e.c) }
+
+func Send[T any](ctx context.Context, ch chan<- T, v T) bool {
+	select {
+	case ch <- v:
+		return true
+	case <-ctx.Done():
+		return false
+	}
+}
+
+func SendWithTimeout[T any](ctx context.Context, ch chan<- T, v T, timeout time.Duration) bool {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	select {
+	case ch <- v:
+		return true
+	case <-ctx.Done():
+		return false
+	}
+}
+
+func Recv[T any](ctx context.Context, ch <-chan T) (T, bool) {
+	select {
+	case v := <-ch:
+		return v, true
+	case <-ctx.Done():
+		var zero T
+		return zero, false
+	}
+}
